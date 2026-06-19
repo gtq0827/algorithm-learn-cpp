@@ -2,7 +2,13 @@
 #include <map>
 #include <set>
 #include <unordered_set>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <algorithm>
+
 using namespace std;
+
 struct TreeNode {
     int val;                // 节点存储的值
     TreeNode *left;         // 左孩子指针，指向左子节点
@@ -10,8 +16,30 @@ struct TreeNode {
 
 
 };
+
 class Solution {
+
+
 public:
+
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        queue<TreeNode*> queue;
+        vector<vector<int>> result;
+        if (root==NULL) return result;
+        queue.push(root);
+        while(!queue.empty()){
+            int size =queue.size();
+            vector<int> res;
+            while(size--){
+                TreeNode* node=queue.front();
+                queue.pop();
+                if(node->left!= nullptr) queue.push(node->left);
+                if (node->right!= nullptr) queue.push(node->right);
+                res.push_back(node->val);
+            }
+            result.push_back(res);
+        }
+    }
     //迭代法遍历二叉树
     vector<int> inOrderIteration(TreeNode* root) {
         stack<TreeNode*> sk;
@@ -219,7 +247,7 @@ public:
         return result;
     }
     bool canConstruct(string ransomNote, string magazine) {
-        unordered_map<char,int> map;
+        unordered_set<char,int> map;
         for (char ch : ransomNote) {
             map[ch]++;
         }
@@ -230,7 +258,7 @@ public:
         return true;
     }
     int fourSumCount(vector<int>& nums1, vector<int>& nums2, vector<int>& nums3, vector<int>& nums4) {
-        unordered_map<int,int> map;
+        unordered_set<int,int> map;
         int count =0;
         for (int i=0;i<nums1.size();i++) {
             for (int j=0;j<nums2.size();j++) {
@@ -248,7 +276,7 @@ public:
         return count;
     }
     vector<int> twoSum(vector<int>& nums, int target) {
-        unordered_map<int,int> map;
+        unordered_set<int,int> map;
         for (int i=0;i<nums.size();i++) {
             int num=target-nums[i];
             if (map.find(num)!=map.end()) {
