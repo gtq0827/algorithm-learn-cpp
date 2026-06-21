@@ -16,11 +16,64 @@ struct TreeNode {
 
 
 };
+class Node {
+public:
+    int val;
+    vector<Node*> children;
+
+    Node() {}
+
+    Node(int _val) {
+        val = _val;
+    }
+
+    Node(int _val, vector<Node*> _children) {
+        val = _val;
+        children = _children;
+    }
+};
 
 class Solution {
 
 
 public:
+    //递归法
+    int minDepth(TreeNode* root) {
+        if (root==nullptr) return 0;
+        //只存在一个子树
+        if (root->left==nullptr) return minDepth(root->right)+1;
+        if (root->right==nullptr) return minDepth(root->left)+1;
+        //左右子树都存在
+        return min(minDepth(root->left),minDepth(root->right))+1;
+    }
+    //递归法n叉树
+    int maxDepth(Node* root) {
+        if (root==nullptr) return 0;
+        auto children=root->children ;
+        int maxLength=0;
+        for (auto child : children) {
+            maxLength=max(maxLength,maxDepth(child));
+        }
+        return maxLength+1;
+    }
+    //递归法
+    int maxDepth(TreeNode* root) {
+        if (root==nullptr) return 0;
+        return max(maxDepth(root->left),maxDepth(root->right))+1;
+    }
+    TreeNode* invertTree(TreeNode* root) {
+        invert(root);
+        return root;
+    }
+    void invert(TreeNode* root) {
+        if (root==nullptr) return;
+        TreeNode* temp;
+        temp=root->left;
+        root->left=root->right;
+        root->right=temp;
+        invert(root->left);
+        invert(root->right);
+    }
 
     vector<vector<int>> levelOrder(TreeNode* root) {
         queue<TreeNode*> queue;
