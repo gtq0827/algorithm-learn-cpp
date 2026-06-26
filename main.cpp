@@ -6,6 +6,7 @@
 #include <stack>
 #include <queue>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 
@@ -13,68 +14,171 @@ struct TreeNode {
     int val;                // 节点存储的值
     TreeNode *left;         // 左孩子指针，指向左子节点
     TreeNode *right;        // 右孩子指针，指向右子节点
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 
-
-};
-class Node {
-public:
-    int val;
-    vector<Node*> children;
-
-    Node() {}
-
-    Node(int _val) {
-        val = _val;
-    }
-
-    Node(int _val, vector<Node*> _children) {
-        val = _val;
-        children = _children;
-    }
 };
 
 class Solution {
 
 
 public:
-    //递归法
-    int minDepth(TreeNode* root) {
-        if (root==nullptr) return 0;
-        //只存在一个子树
-        if (root->left==nullptr) return minDepth(root->right)+1;
-        if (root->right==nullptr) return minDepth(root->left)+1;
-        //左右子树都存在
-        return min(minDepth(root->left),minDepth(root->right))+1;
+    bool isValidBST(TreeNode* root) {
+        return check(root,LLONG_MIN,LLONG_MAX);
     }
-    //递归法n叉树
-    int maxDepth(Node* root) {
-        if (root==nullptr) return 0;
-        auto children=root->children ;
-        int maxLength=0;
-        for (auto child : children) {
-            maxLength=max(maxLength,maxDepth(child));
+    bool check(TreeNode* root,long long low,long long high){
+        if (root== nullptr) return true;
+        if (root->val<low|| root->val>high) return false;
+        return check(root->left,low,root->val)&& check(root->right,root->val,high);
+    }
+    TreeNode* searchBST(TreeNode* root, int val) {
+        if (root==nullptr)return nullptr;
+        if (root->val==val) return root;
+        else if(root->val>val) return searchBST(root->left,val);
+        else {
+            return searchBST(root->right,val);
         }
-        return maxLength+1;
     }
-    //递归法
-    int maxDepth(TreeNode* root) {
-        if (root==nullptr) return 0;
-        return max(maxDepth(root->left),maxDepth(root->right))+1;
+    TreeNode* mergeTrees(TreeNode* root1, TreeNode* root2) {
+        if (root1== nullptr) return root2;
+        if (root2== nullptr) return root1;
+        TreeNode* node=new TreeNode(root1->val + root2->val);
+        node->left= mergeTrees(root1->left,root2->left);
+        node->right= mergeTrees(root1->right,root2->right);
+        return node;
+
     }
-    TreeNode* invertTree(TreeNode* root) {
-        invert(root);
-        return root;
-    }
-    void invert(TreeNode* root) {
-        if (root==nullptr) return;
-        TreeNode* temp;
-        temp=root->left;
-        root->left=root->right;
-        root->right=temp;
-        invert(root->left);
-        invert(root->right);
+    TreeNode* constructMaximumBinaryTree(vector<int>& nums) {
+        if (nums.empty()) return nullptr;
+        int max=-1,maxIndex=0;
+        for(int i=0;i<nums.size();i++){
+            if (nums[i]>max) max=nums[i],maxIndex=i;
+        }
+        TreeNode* node=new TreeNode(max);
+        vector<int> leftTree(nums.begin(),nums.begin()+maxIndex);
+        vector<int> rightTree(nums.begin()+maxIndex+1,nums.end());
+        node->left= constructMaximumBinaryTree(leftTree);
+        node->right= constructMaximumBinaryTree(rightTree);
+        return node;
     }
 
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        if (inorder.empty()) return nullptr;
+        int val=postorder.back();
+        TreeNode* node;
+        node->val=val;
+        //寻找切割点
+        int divide;
+        for (divide=0;divide<inorder.size();divide++){
+            if (inorder[divide]==val) break;
+        }
+        //获得左右子树的数组
+        vector<int> rightInoder(inorder.begin()+divide+1,inorder.end());
+        vector<int> leftInorder(inorder.begin(),inorder.begin()+divide);
+        vector<int> leftPost(postorder.begin(),postorder.begin()+leftInorder.size());
+        vector<int> rightPost(postorder.begin()+leftInorder.size(),postorder.end()-1);
+        node->left= buildTree(leftInorder, leftPost);
+        node->right= buildTree(rightInoder,rightPost);
+        return node;
+    }
+
+
+    bool pathTravsal(TreeNode* root,int pathSum,int targetsum){
+        if (root== nullptr) return false;
+        if (root->left== nullptr&&root->right== nullptr) if (pathSum+root->val==targetsum) return true;
+        return pathTravsal(root->left,pathSum+root->val,targetsum)|| pathTravsal(root->right,pathSum+root->val,targetsum);
+    }
+
+    bool hasPathSum(TreeNode* root, int targetSum) {
+        return pathTravsal(root,0,targetSum);
+    }
+    int maxDepth=INT_MIN;
+    int result;
+    void travasal(TreeNode* root,int depth){
+        if (root->left== nullptr&&root->right== nullptr){
+            if (depth>maxDepth) {
+                maxDepth=depth;
+                result=root->val;
+            }
+            return;
+        }
+        if (root->left) travasal(root->left,depth+1);
+        if (root->right) travasal(root->right,depth+1);
+
+    }
+    int findBottomLeftValue(TreeNode* root) {
+        travasal(root,1);
+        return result;
+
+    }
+
+
+    int sumOfLeftLeaves(TreeNode* root) {
+        if (root== nullptr) return 0;
+        int sum=0;
+        if (root->left!= nullptr&&root->left->left== nullptr&&root->left->right== nullptr) sum += root->left->val;
+        sum+= sumOfLeftLeaves(root->left);
+        sum+= sumOfLeftLeaves(root->right);
+        return sum;
+    }
+
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        if (p== nullptr&&q== nullptr) return true;
+        else if (p!= nullptr&&q!= nullptr) {
+            if(p->val==q->val) {
+                return isSameTree(p->left,q->left)&& isSameTree(p->right,q->right);
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    void travasal(TreeNode* root,string path,vector<string>& result){
+        path+= to_string(root->val);
+        if (root->left== nullptr&&root->right== nullptr){
+            result.push_back(path);
+            return;
+        }
+        if (root->right) travasal(root->right,path+"->",result);
+        if (root->left) travasal(root->left,path+"->",result);
+    }
+    vector<string> binaryTreePaths(TreeNode* root) {
+        string  path;
+        vector<string> result;
+        if (root== nullptr) return result;
+        travasal(root,path,result);
+        return result;
+    }
+    bool isBalanced(TreeNode* root) {
+        if (root== nullptr) return true;
+        int left= depth(root->left);
+        int right= depth(root->right);
+        if (abs(left-right)>1) return false;
+        return isBalanced(root->right)&& isBalanced(root->left);
+    }
+    int depth(TreeNode* root){
+        if (root== nullptr) return 0;
+        return max(depth(root->right),depth(root->left))+1;
+    }
+    //完全二叉树求节点数量
+    int countNodes(TreeNode* root) {
+        if (root== nullptr) return 0;
+        TreeNode* left=root->left;
+        TreeNode* right=root->right;
+        int rightHeigth=0,leftHeigth=0;
+        while(right){
+            right=right->right;
+            rightHeigth++;
+        }
+        while (left){
+            left=left->left;
+            leftHeigth++;
+        }
+        if (rightHeigth==leftHeigth) return (2<<leftHeigth)-1;
+        return countNodes(root->left)+ countNodes(root->right)+1;
+    }
     vector<vector<int>> levelOrder(TreeNode* root) {
         queue<TreeNode*> queue;
         vector<vector<int>> result;
