@@ -24,6 +24,123 @@ class Solution {
 
 
 public:
+    //反中序遍历
+    int sum=0;
+    void convert_BST(TreeNode* root){
+        if (root== nullptr) return ;
+        convertBST(root->right);
+        sum+=root->val;
+        root->val=sum;
+        convertBST(root->left);
+    }
+    TreeNode* convertBST(TreeNode* root) {
+        convert_BST(root);
+        return root;
+
+    }
+
+
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        if (nums.empty()) return nullptr;
+        TreeNode* root=new TreeNode(nums[nums.size()/2]);
+        vector<int> left(nums.begin(),nums.begin()+nums.size()/2);
+        vector<int> right(nums.begin()+nums.size()/2+1,nums.end());
+        root->left= sortedArrayToBST(left);
+        root->right= sortedArrayToBST(right);
+        return root;
+    }
+    TreeNode* trimBST(TreeNode* root, int low, int high) {
+        if (root== nullptr) return nullptr;
+        if (root->val<low) return trimBST(root->right,low,high);
+        if (root->val>high) return trimBST(root->left,low,high);
+        root->left=trimBST(root->right,low,high);
+        root->right=trimBST(root->left,low,high);
+        return root;
+    }
+
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        if (root== nullptr) return nullptr;
+        if (root->val==key){
+            TreeNode* left = root->left;
+            TreeNode* right = root->right;
+            delete(root);
+            if (left== nullptr&&right== nullptr) return nullptr;
+            if (left&&!right) return left;
+            if (!left&&right) return right;
+            if (left&&right) {
+                TreeNode* cur=right;
+                while (cur->left!= nullptr){
+                    cur =cur->left;
+                }
+                cur->left=left;
+                return right;
+            }
+        }
+        root->left= deleteNode(root->left,key);
+        root->right= deleteNode(root->right,key);
+        return root;
+    }
+
+    TreeNode* insertIntoBST(TreeNode* root, int val) {
+        if (root== nullptr) {
+            TreeNode* node =new TreeNode(val);
+            return node ;
+        }
+        if (val>root->val) root->right= insertIntoBST(root->right,val);
+        if (val<root->val) root->left= insertIntoBST(root->left,val);
+        return root;
+    }
+    //二叉搜索树
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (root== nullptr) return nullptr;
+        if (root->val>q->val &&root->val>p->val) return lowestCommonAncestor(root->left,p,q);
+        else if (root->val<q->val&&root->val<p->val) return lowestCommonAncestor(root->right,p,q);
+        else return root;
+    }
+    /*TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if(root== nullptr) return nullptr;
+        if(root==p||root==q) return root;
+        TreeNode* left= lowestCommonAncestor(root->left,p,q);
+        TreeNode* right= lowestCommonAncestor(root->right,p,q);
+        if (left!= nullptr&&right!= nullptr) return root;
+        if (left== nullptr&&right!= nullptr) return right;
+        if (left!= nullptr&&right== nullptr) return left;
+        return nullptr;
+    }*/
+    void findmode(TreeNode* root, vector<int>& res, int& maxCount, int& curVal, int& curCount){
+        if (root== nullptr) return;
+        findmode(root->left,res,maxCount,curVal,curCount);
+        if (root->val==curVal) curCount++;
+        else curVal=root->val,curCount=0;
+        if (curCount==maxCount) res.push_back(root->val);
+        else if (curCount> maxCount){
+            maxCount=curCount;
+            res.clear();
+            res.push_back(root->val);
+        }
+        findmode(root->right,res,maxCount,curVal,curCount);
+    }
+
+    vector<int> findMode(TreeNode* root) {
+        vector<int> res;
+        int maxCount=-1,curVal=-1,curCount=0;
+        findmode(root,res,maxCount,curVal,curCount);
+        return res;
+    }
+    TreeNode*pre= nullptr;
+    int result=INT_MAX;
+    void travsalMin(TreeNode* root){
+        if (root== nullptr) return ;
+        travsalMin(root->left);
+        if (pre) result = min(result, abs(root->val - pre->val));
+        pre=root;
+        travsalMin(root->right);
+    }
+
+    int getMinimumDifference(TreeNode* root) {
+        travsalMin(root);
+        return result;
+    }
     bool isValidBST(TreeNode* root) {
         return check(root,LLONG_MIN,LLONG_MAX);
     }
