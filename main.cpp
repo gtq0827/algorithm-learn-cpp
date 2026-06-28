@@ -7,6 +7,7 @@
 #include <queue>
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 using namespace std;
 
@@ -24,6 +25,78 @@ class Solution {
 
 
 public:
+    const string letterMap[10] = {
+        "", // 0
+        "", // 1
+        "abc", // 2
+        "def", // 3
+        "ghi", // 4
+        "jkl", // 5
+        "mno", // 6
+        "pqrs", // 7
+        "tuv", // 8
+        "wxyz", // 9
+    };
+    vector<string> res;
+    string path;
+    void letterCombination_backtracking(string digits,int index) {
+        if (path.size()==digits.size()) {
+            res.push_back(path);
+            return ;
+        }
+        string letters=letterMap[digits[index]-'0'];
+        for (int i=0;i<letters.size();i++) {
+            path.push_back(letters[i]);
+            letterCombination_backtracking(digits,index+1);
+            path.pop_back();
+        }
+    }
+
+    vector<string> letterCombinations(string digits) {
+        letterCombination_backtracking(digits,0);
+        return res;
+    }
+    /*vector<vector<int>> res;
+    vector<int> path;
+
+    void combinationSum3_backtracking(int k, int n,int startindex) {
+        if ( path.size()==k) {
+            if (accumulate(path.begin(), path.end(), 0)==n) {
+                res.push_back(path);
+                return;
+            }else {
+                return;
+            }
+        }
+
+        for (int i=startindex;i<=9-k+path.size()+1;i++) {
+            path.push_back(i);
+            combinationSum3_backtracking(k,n,i+1);
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> combinationSum3(int k, int n) {
+        combinationSum3_backtracking(k,n,1);
+        return res;
+    }
+
+
+    void combine_backtracking(int n,int k,int startindex) {
+        if (path.size()==k) {
+            res.push_back(path);
+            return ;
+        }
+        for (int i=startindex;i<n;i++) {
+            path.push_back(i);
+            combine_backtracking(n,k,i+1);
+            path.pop_back();
+        }
+    }
+    //回溯算法
+    vector<vector<int>> combine(int n, int k) {
+        combine_backtracking(n,k,0);
+        return res;
+    }*/
     //反中序遍历
     int sum=0;
     void convert_BST(TreeNode* root){
