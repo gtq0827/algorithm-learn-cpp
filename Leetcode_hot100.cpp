@@ -234,5 +234,62 @@ class Solution {
         }
         return res;
     }
+
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        sort(intervals.begin(),intervals.end(),[](vector<int> a,vector<int> b) {
+            return a[0]<b[0];
+        });
+        vector<vector<int>> res;
+        res.push_back(intervals[0]);
+        for (int i=1;i<intervals.size();i++) {
+            if (intervals[i][0]<=res.back()[1]) res.back()[1]=intervals[i][1];
+            else res.push_back(intervals[i]);
+        }
+        return res;
+    }
+    void reverseNtoM(vector<int> &nums,int n,int m) {
+        while (n<m) {
+            swap(nums[n++],nums[m--]);
+        }
+    }
+    void rotate(vector<int>& nums, int k) {
+        reverseNtoM(nums,0,nums.size()-1);
+        reverseNtoM(nums,0,k-1);
+        reverseNtoM(nums,k-1,nums.size()-1);
+    }
+    int firstMissingPositive(vector<int>& nums) {
+        int res=0;
+        for (int i=0;i<nums.size();i++) {
+            while (nums[i]>0&&nums[i]<=nums.size()&&nums[nums[i]-1]!=nums[i]) {
+                swap(nums[nums[i]-1],nums[i]);
+            }
+        }
+        for (int i=0;i<nums.size();i++) {
+            if (nums[i]!=i+1) return i+1;
+        }
+        return nums.size();
+    }
+
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector<int > res;
+        int l=0;
+        int r=matrix[0].size()-1;
+        int u=0;
+        int d=matrix.size()-1;
+
+        while (true) {
+            for (int i=l;i<=r;i++) res.push_back(matrix[u][i]);
+            if (++u>d) break;
+            for (int i=u;i<=d;i++) res.push_back(matrix[i][r]);
+            if (--r<l) break;
+            for (int i=r;i>=l;i--) res.push_back(matrix[d][i]);
+            if (--d<u) break;
+            for (int i=d;i>=u;i--) res.push_back(matrix[i][l]);
+            if (++l>r) break;
+
+        }
+        return res;
+    }
+    
 };
 
