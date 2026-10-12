@@ -12,6 +12,7 @@
 #include <queue>
 #include <algorithm>
 #include <cmath>
+#include <list>
 #include <numeric>
 
 using namespace std;
@@ -29,6 +30,13 @@ struct TreeNode {
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {
     }
 };
+struct ListNode {
+        int val;
+        ListNode *next;
+        ListNode() : val(0), next(nullptr) {}
+        ListNode(int x) : val(x), next(nullptr) {}
+        ListNode(int x, ListNode *next) : val(x), next(next) {};
+     };
 
 
 class Solution {
@@ -290,6 +298,228 @@ class Solution {
         }
         return res;
     }
+
+    void rotate(vector<vector<int>>& matrix) {
+        //先转置矩阵
+        for (int i=0;i<matrix.size();i++) {
+            for (int j=i+1;j<matrix[0].size();j++) {
+                swap(matrix[i][j],matrix[j][i]);
+            }
+        }
+        //倒转每一行
+        for (int i=0;i<matrix.size();i++) {
+            reverse(matrix[i].begin(),matrix[i].end());
+        }
+
+    }
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int m=matrix.size();
+        int n=matrix[0].size();
+        int row=0;
+        int col=n-1;
+        while (row<m&&col>=0) {
+            if (matrix[row][col]==target) return true;
+            else if (matrix[row][col]<target) row++;
+            else col--;
+        }
+        return false;
+    }
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        int lenA=0,lenB=0;
+        ListNode *pA=headA;
+        ListNode *pB=headB;
+        while (pA!=nullptr) {
+            lenA++;
+            pA=pA->next;
+        }
+        while (pB!=nullptr) {
+            lenB++;
+            pB=pB->next;
+        }
+        pA=headA;
+        pB=headB;
+        while (pA!=pB) {
+            if (lenA>lenB)pA=pA->next,lenA--;
+            else if (lenA<lenB)pB=pB->next,lenB--;
+            else{
+                pA=pA->next;
+                pB=pB->next;
+            }
+        }
+        return pA==pB? pA:nullptr;
+
+
+    }
+
+    ListNode* reverseList(ListNode* head) {
+        ListNode *dummy=(ListNode*)malloc(sizeof(ListNode));
+        dummy->next=head;
+        ListNode* pre=nullptr;
+        ListNode* cur=head;
+        ListNode* next;
+        while (cur!=nullptr) {
+            next=cur->next;
+            cur->next=pre;
+            pre=cur;
+            cur=next;
+        }
+        dummy->next=pre;
+        return pre;
+
+    }
+    ListNode* reverseBetween(ListNode* head, int left, int right) {
+        ListNode* dummy=(ListNode*)malloc(sizeof(ListNode));
+        dummy->next=head;
+        ListNode* p=dummy;
+        ListNode* cur;
+        for (int i=1;i<left;i++) {
+            p=p->next;
+        }
+        ListNode* pre=nullptr;
+        cur=p->next;
+        for (int i=0;i<right-left+1;i++) {
+            ListNode* next=cur->next;
+            cur->next=pre;
+            pre=cur;
+            cur=next;
+        }
+        p->next->next=cur;
+        p->next=pre;
+        return dummy->next;
+
+    }
+    bool isPalindrome(ListNode* head) {
+        ListNode* low=head;
+        ListNode* fast=head;
+        ListNode* p=head;
+        while (fast!=nullptr&&fast->next!=nullptr) {
+            low=low->next;
+            fast=fast->next->next;
+        }
+        if(fast != nullptr){
+            low = low->next;
+        }
+        ListNode* pre=nullptr;
+        while (low!=nullptr) {
+            ListNode* next=low->next;
+            low->next=pre;
+            pre=low;
+            low=next;
+        }
+
+
+        while (pre!=nullptr) {
+            low=low->next;
+            if (low->val!=p->val) return false;
+            p=p->next;
+        }
+        return true;
+    }
+    bool hasCycle(ListNode *head) {
+        ListNode* low=head;
+        ListNode* fast=head;
+        while (fast!=nullptr&&fast->next!=nullptr) {
+            low=low->next;
+            fast=fast->next->next;
+            if (low==fast) return true;
+        }
+        return false;
+    }
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        ListNode* head=nullptr;
+        ListNode* cur=nullptr;
+        while (list1!=nullptr&&list2!=nullptr) {
+            if (list1->val<list2->val) {
+                if (head==nullptr) head=list1;
+                if (cur==nullptr) cur=list1;
+                else {
+                    cur->next=list1;
+                }
+                list1=list1->next;
+            }else {
+                if (head==nullptr) head=list2;
+                if (cur==nullptr) cur=list2;
+                else {
+                    cur->next=list2;
+                }
+                list2=list2->next;
+            }
+        }
+        if (list1!=nullptr) cur->next=list1;
+        if (list2!=nullptr) cur->next=list2;
+
+        return head;
+    }
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode dummy;
+        ListNode* cur=&dummy;
+        int carry=0;
+        while (l1||l2||carry) {
+            int sum=carry;
+            if (l1!=nullptr) {
+                sum+=l1->val;
+                l1=l1->next;
+            }
+            if (l2!=nullptr) {
+                sum+=l2->val;
+                l2=l2->next;
+            }
+            carry=sum/10;
+            cur->next=new ListNode(sum%10);
+            cur=cur->next;
+        }
+        return dummy.next;
+
+    }
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode dummy;
+        dummy.next = head;
+        ListNode *fast = &dummy;
+        ListNode *slow = &dummy;
+
+        for (int i=0;i<n;i++) {
+            fast=fast->next;
+        }
+        while (fast->next!=nullptr) {
+            fast=fast->next;
+            slow=slow->next;
+        }
+        slow->next=slow->next->next;
+        return dummy.next;
+    }
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        stack<ListNode*> st;
+        ListNode dummy;
+        dummy.next=head;
+        ListNode* pre=&dummy;
+        ListNode* cur=head;
+        int count =0;
+        while (cur!=nullptr) {
+            st.push(cur);
+            count++;
+            cur=cur->next;
+            if (count==k) {
+                for (int i=0;i<k;i++) {
+                    pre->next=st.top();
+                    st.pop();
+                    pre=pre->next;
+                }
+                count=0;
+            }
+
+        }
+        if (count>0) {
+            for (int i=0;i<count-1;i++) {
+                st.pop();
+            }
+            pre->next=st.top();
+        }else {
+            pre->next=nullptr;
+        }
+        return dummy.next;
+
+    }
+
     
 };
 
