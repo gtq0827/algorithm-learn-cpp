@@ -14,6 +14,7 @@
 #include <cmath>
 #include <list>
 #include <numeric>
+#include <unordered_map>
 
 using namespace std;
 
@@ -29,6 +30,149 @@ struct TreeNode {
 
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {
     }
+
+    string minWindow(string s, string t) {
+        unordered_map<char, int> need, window;
+        int count = 0;//计算当前有多少个字符满足要求
+        int start = 0, minlen = INT_MAX;
+        int right = 0, left = 0;
+        for (const auto &c: t) need[c]++;
+        while (right < s.size()) {
+            char c = s[right++];
+            if (need.count(c)) {
+                window[c]++;
+                if (window[c] == need[c]) {//满足要求
+                    count++;
+                }
+            }
+            while (count == need.size()) {
+                if (minlen > right - left) {
+                    minlen = right - left;
+                    start = left;
+                }
+                char d = s[left];
+                left++;
+                if (need.count(d)) {
+                    if (window[d] == need[d]) {
+                        count--;
+                    }
+                    window[d]--;
+                }
+            }
+        }
+        return minlen == INT_MAX ? "" : s.substr(start, minlen);
+    }
+
+    int maxSubArray(vector<int> &nums) {
+        int maxSum = INT_MIN;
+        int sum = 0;
+        for (int i = 0; i < nums.size(); i++) {
+            sum += nums[i];
+            maxSum = max(maxSum, sum);
+            if (sum < 0) {
+                sum = 0;
+            }
+        }
+        return maxSum;
+
+    }
+
+    vector<int> productExceptSelf(vector<int> &nums) {
+        vector<int> left(nums.size(), 1);
+        vector<int> right(nums.size(), 1);
+        vector<int> ans;
+        int len = nums.size();
+        if (len == 1) return vector<int>(1, 0);
+        for (int i = 0; i < len - 1; i++) {
+            left[i + 1] = left[i] * nums[i + 1];
+            right[len - i - 2] = right[len - i - 1] * nums[i - 1];
+        }
+        ans[0] = right[0];
+        ans[len - 1] = left[len - 1];
+        for (int i = 1; i < nums.size() - 1; ++i) {
+            ans[i] = left[i] * right[i];
+        }
+        return ans;
+    }
+
+    void setZeroes(vector<vector<int>> &matrix) {
+        int firstHang = 1;
+        for (int j = 0; j < matrix.size(); j++) {
+            if (matrix[0][j] == 0) firstHang = 0;
+        }
+        for (int i = 1; i < matrix.size(); i++) {
+            for (int j = 0; j < matrix[0].size(); j++) {
+                if (matrix[i][j] == 0) matrix[0][j] = 0, matrix[i][0] = 0;
+            }
+        }
+        for (int i = 0; i < matrix.size(); i++) {
+            for (int j = 0; j < matrix[0].size(); j++) {
+                if (i == 0) {
+                    if (firstHang == 0) matrix[i][j] = 0;
+                }
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;
+            }
+        }
+    }
+
+
+    struct ListNode {
+        int val;
+        ListNode *next;
+
+        ListNode() : val(0), next(nullptr) {}
+
+        ListNode(int x) : val(x), next(nullptr) {}
+
+        ListNode(int x, ListNode *next) : val(x), next(next) {}
+    };
+
+        /*ListNode *swapPairs(ListNode *head) {
+            ListNode dummy;
+            ListNode* pre=&dummy;
+            dummy.next=head;
+            stack<ListNode*> st;
+            int count=0;
+            while(head){
+                if (count==2){
+                    pre->next=st.top();
+                    st.pop();
+                    count--;
+                    pre->next->next=st.top();
+                    st.pop();
+                    count--;
+                    pre=pre->next->next;
+                }
+                st.push(head);
+                head=head->next;
+                count++;
+            }
+            if (count==1) pre->next=st.top(),pre->next->next= nullptr;
+            else if (count==0)pre->next= nullptr;
+            else {
+                pre->next=st.top();
+                st.pop();
+                pre->next->next=st.top();
+                pre->next->next->next= nullptr;
+            }
+
+            return dummy.next;
+        }
+*/
+//递归
+        ListNode* swapPairs(ListNode* head) {
+            if (head== nullptr||head->next== nullptr) return head;
+
+            ListNode* node1=head;
+            ListNode* node2=head->next;
+            ListNode* node3=head->next->next;
+
+            node1->next= swapPairs(node3);
+            node2->next=node1;
+
+            return node2;
+        }
+
 };
 struct ListNode {
         int val;
@@ -40,101 +184,107 @@ struct ListNode {
 
 
 class Solution {
-    vector<int> twoSum(vector<int>& nums, int target) {
-    //    for (int i=0;i<nums.size();i++) {
-    //        for (int j=i;j<nums.size();j++) {
-    //            if (nums[i]+nums[j]==target) return vector<int>(i,j);
-    //        }
-    //    }
-    //     return vector<int>();
-        unordered_map<int,int> ump;
-        for (int i=0;i<nums.size();i++) {
-            auto it=ump.find(target-nums[i]);
-            if (it!=ump.end()) return {i,it->second};
+    vector<int> twoSum(vector<int> &nums, int target) {
+        //    for (int i=0;i<nums.size();i++) {
+        //        for (int j=i;j<nums.size();j++) {
+        //            if (nums[i]+nums[j]==target) return vector<int>(i,j);
+        //        }
+        //    }
+        //     return vector<int>();
+        unordered_map<int, int> ump;
+        for (int i = 0; i < nums.size(); i++) {
+            auto it = ump.find(target - nums[i]);
+            if (it != ump.end()) return {i, it->second};
             else {
-                ump.insert(pair<int,int>{nums[i],i});
+                ump.insert(pair<int, int>{nums[i], i});
             }
         }
         return {};
-     }
-    vector<vector<string>> groupAnagrams(vector<string>& strs) {
-        unordered_map<string,vector<string>> ump;
+    }
+
+    vector<vector<string>> groupAnagrams(vector<string> &strs) {
+        unordered_map<string, vector<string>> ump;
         vector<vector<string>> res;
-        for (int i=0;i<strs.size();i++) {
-            string str=strs[i];
-            sort(strs[i].begin(),strs[i].end());
+        for (int i = 0; i < strs.size(); i++) {
+            string str = strs[i];
+            sort(strs[i].begin(), strs[i].end());
             ump[strs[i]].push_back(str);
         }
-        for (auto pair : ump) {
+        for (auto pair: ump) {
             res.push_back(pair.second);
         }
         return res;
     }
-    int longestConsecutive(vector<int>& nums) {
+
+    int longestConsecutive(vector<int> &nums) {
         unordered_set<int> ust;
-        for (const int & num : nums) {
+        for (const int &num: nums) {
             ust.insert(num);
         }
-        int longestStreak=0;
-        for (const int & num : ust) {
-            if (!ust.count(num-1)) {//若不存在前序列
-                int currentNum=num;
-                int longStreak=1;
-                while (ust.count(num+1)) {//存在后续序列
+        int longestStreak = 0;
+        for (const int &num: ust) {
+            if (!ust.count(num - 1)) {//若不存在前序列
+                int currentNum = num;
+                int longStreak = 1;
+                while (ust.count(num + 1)) {//存在后续序列
                     currentNum++;
                     longStreak++;
                 }
-                longestStreak=max(longestStreak,longStreak);
+                longestStreak = max(longestStreak, longStreak);
 
             }
         }
         return longestStreak;
     }
-    void moveZeroes(vector<int>& nums) {
-        int left=0,right=0;
-        while (right<nums.size()) {
+
+    void moveZeroes(vector<int> &nums) {
+        int left = 0, right = 0;
+        while (right < nums.size()) {
             if (nums[right]) {
-                swap(nums[left],nums[right]);
+                swap(nums[left], nums[right]);
                 left++;
             }
             right++;
         }
     }
+
     //解法二
-    void moveZeroes2(vector<int>& nums) {
-        int index=0;
-        for (int num : nums) {
-            if (num) nums[index++]=num;
+    void moveZeroes2(vector<int> &nums) {
+        int index = 0;
+        for (int num: nums) {
+            if (num) nums[index++] = num;
         }
-        for (int i=index;i<nums.size();i++) {
-            nums[i]=0;
+        for (int i = index; i < nums.size(); i++) {
+            nums[i] = 0;
         }
     }
-    int maxArea(vector<int>& height) {
-        int left=0;
-        int right=height.size();
-        int maxArea=0;
-        while (left<right) {
-            maxArea=max(maxArea,min(height[left],height[right])*(right-left));
-            if (height[left]<height[right]) left++;
+
+    int maxArea(vector<int> &height) {
+        int left = 0;
+        int right = height.size();
+        int maxArea = 0;
+        while (left < right) {
+            maxArea = max(maxArea, min(height[left], height[right]) * (right - left));
+            if (height[left] < height[right]) left++;
             else right--;
         }
         return maxArea;
     }
-    vector<vector<int>> threeSum(vector<int>& nums) {
+
+    vector<vector<int>> threeSum(vector<int> &nums) {
         vector<vector<int>> res;
-        sort(nums.begin(),nums.end());
-        for (int i=0;i<nums.size();i++) {
-            if (i>0&&nums[i]==nums[i-1]) continue;
-            int left=i+1;
-            int right=nums.size()-1;
-            while (left<right) {
-                if (nums[i]+nums[left]+nums[right]>0) right--;
-                else if (nums[i]+nums[left]+nums[right]<0) left++;
+        sort(nums.begin(), nums.end());
+        for (int i = 0; i < nums.size(); i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int left = i + 1;
+            int right = nums.size() - 1;
+            while (left < right) {
+                if (nums[i] + nums[left] + nums[right] > 0) right--;
+                else if (nums[i] + nums[left] + nums[right] < 0) left++;
                 else {
-                    res.push_back(vector<int>{nums[i],nums[left],nums[right]});
-                    while (left<right&&nums[right]==nums[right-1]) right--;
-                    while (left<right&&nums[left]==nums[left+1]) left++;
+                    res.push_back(vector<int>{nums[i], nums[left], nums[right]});
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    while (left < right && nums[left] == nums[left + 1]) left++;
 
                     right--;
                     left++;
@@ -143,21 +293,22 @@ class Solution {
         }
         return res;
     }
-    int trap(vector<int>& height) {
+
+    int trap(vector<int> &height) {
         stack<int> st;
         st.push(0);
-        int res=0;
-        for (int i=1;i<height.size();i++) {
-            if (height[i]<height[st.top()]) st.push(i);
-            else if (height[i]==height[st.top()]) st.pop(),st.push(i);
+        int res = 0;
+        for (int i = 1; i < height.size(); i++) {
+            if (height[i] < height[st.top()]) st.push(i);
+            else if (height[i] == height[st.top()]) st.pop(), st.push(i);
             else {
-                while (!st.empty()&&height[i]>height[st.top()]) {
-                    int mid=st.top();
+                while (!st.empty() && height[i] > height[st.top()]) {
+                    int mid = st.top();
                     st.pop();
                     if (!st.empty()) {
-                        int h=min(height[i],height[st.top()])-height[mid];
-                        int s=i-st.top()-1;
-                        res+=h*s;
+                        int h = min(height[i], height[st.top()]) - height[mid];
+                        int s = i - st.top() - 1;
+                        res += h * s;
                     }
                 }
 
@@ -166,77 +317,85 @@ class Solution {
         }
         return res;
     }
+
     int lengthOfLongestSubstring(string s) {
-        unordered_set<char>  ust;
-        int left=0,res=0;
-        for (int right=0;right<s.size();right++) {
+        unordered_set<char> ust;
+        int left = 0, res = 0;
+        for (int right = 0; right < s.size(); right++) {
             while (ust.count(s[right])) {
                 ust.erase(s[left++]);
             }
             ust.insert(s[right]);
-            res=max(res,right-left+1);
+            res = max(res, right - left + 1);
         }
         return res;
     }
+
     vector<int> findAnagrams(string s, string p) {
         vector<int> res;
         vector<int> sCount(26);
         vector<int> pCount(26);
-        int sLen=s.size(),pLen=p.size();
-        if (pLen>sLen) return res;
-        int right=0,left=0;
+        int sLen = s.size(), pLen = p.size();
+        if (pLen > sLen) return res;
+        int right = 0, left = 0;
 
-        for (;right<pLen;right++) {
-            sCount[s[right]-'a']++;
-            pCount[p[right]-'a']++;
+        for (; right < pLen; right++) {
+            sCount[s[right] - 'a']++;
+            pCount[p[right] - 'a']++;
         }
-        if (sCount==pCount) res.push_back(0);
-        for (;right<sLen;right++,left++) {
-            sCount[s[left-1]-'a']--;
-            sCount[s[right]-'a']++;
-            if (sCount==pCount) res.push_back(left);
+        if (sCount == pCount) res.push_back(0);
+        for (; right < sLen; right++, left++) {
+            sCount[s[left - 1] - 'a']--;
+            sCount[s[right] - 'a']++;
+            if (sCount == pCount) res.push_back(left);
         }
         return res;
     }
-    int subarraySum(vector<int>& nums, int k) {
 
-        int res=0;
-        unordered_map<int,int> ump;
-        ump[0]=1;
-        int preSum=0;
-        for (const int & num : nums) {
-            preSum+=num;
-            if (ump.find(preSum-k)!=ump.end()) {
-                res+=ump[preSum-k];
+    int subarraySum(vector<int> &nums, int k) {
+
+        int res = 0;
+        unordered_map<int, int> ump;
+        ump[0] = 1;
+        int preSum = 0;
+        for (const int &num: nums) {
+            preSum += num;
+            if (ump.find(preSum - k) != ump.end()) {
+                res += ump[preSum - k];
             }
             ump[preSum]++;
         }
         return res;
     }
+
     class MyQueue {
-        public:
+    public:
         deque<int> que;
+
         void pop(int value) {
-            if (!que.empty()&&que.front()==value) que.pop_front();
+            if (!que.empty() && que.front() == value) que.pop_front();
         }
+
         void push(int value) {
-            while (!que.empty()&&que.back()<value) que.pop_back();
+            while (!que.empty() && que.back() < value) que.pop_back();
             que.push_back(value);
         }
-        int  front() {
+
+        int front() {
             return que.front();
         }
     };
-    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
-        
+
+    vector<int> maxSlidingWindow(vector<int> &nums, int k) {
+
         MyQueue myQue;
         vector<int> res;
-        for (int i=0;i<k;i++) {
+        for (int i = 0; i < k; i++) {
             myQue.push(nums[i]);
         }
         res.push_back(myQue.front());
-        for (int i=k;i<nums.size();i++) {
-            myQue.pop(nums[i-k]);
+        for (int i = k; i < nums.size(); i++) {
+            myQue.pop(nums[i - k]);
             myQue.push(nums[i]);
             res.push_back(myQue.front());
         }
@@ -297,6 +456,33 @@ class Solution {
 
         }
         return res;
+
+    }
+
+    class Node {
+    public:
+        int val;
+        Node* next;
+        Node* random;
+
+        Node(int _val) {
+            val = _val;
+            next = NULL;
+            random = NULL;
+        }
+    };
+
+    unordered_map<Node*,Node*> nodeCache;
+    Node* copyRandomList(Node* head) {
+        if (head==nullptr) return nullptr;
+        //不存在
+        if (!nodeCache.count(head)){
+            Node* newNode=new Node(head->val);
+            nodeCache[head]=newNode;
+            newNode->next= copyRandomList(head->next);
+            newNode->random= copyRandomList(head->random);
+        }
+        return nodeCache[head];
     }
 
     void rotate(vector<vector<int>>& matrix) {
